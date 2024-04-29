@@ -1,0 +1,24 @@
+test2
+test3
+test4
+test5
+test6
+test8
+test7
+main.py
+templates.txt
+Nouveau Document texte.txt
+jord.txt
+hello.txt
+111.txt
+cc
+hello
+111
+Nouveau Document texte.txt
+Nouveau Document texte - Copie.txt
+Nouveau Document texte - Copie (3).txt
+Nouveau Document texte - Copie (3) - Copie.txt
+Nouveau Document texte.txt
+profil.jpeg
+profil - Copie.jpeg
+Nouveau Document texte - Copie.txt
