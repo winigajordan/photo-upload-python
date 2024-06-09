@@ -23,25 +23,17 @@ def updatePath(chaine):
             nouvelle_chaine += caractere
     return nouvelle_chaine
 
-"""
-def get_path_from_directory(nom_fichier):
-    try:
-        with open(nom_fichier, 'r') as fichier:
-            lignes = fichier.readlines()
-            if lignes:
-                derniere_ligne = lignes[-1].strip()  # Strip pour supprimer les caractères de nouvelle ligne
-                return derniere_ligne
-            else:
-                return None  # Si le fichier est vide
-    except FileNotFoundError:
-        print("Le fichier spécifié n'existe pas.")
-        return None  # Si le fichier n'existe pas
-    except Exception as e:
-        print("Une erreur s'est produite lors de la lecture du fichier:", e)
-        return None
 
-"""
+def send(fichier):
+    with open('elements_envoyes.txt', 'a') as f:
+                                    f.write(fichier + '\n')
 
+
+def error(fichier, chemin_complet):
+    with open('elements_non_envoyes.txt', 'a') as f:
+        f.write(fichier + '\n')
+    data.shutil.copy(chemin_complet, data.os.path.join(data.repertoire_erreurs, fichier))
+    
 
 
 def main():
@@ -69,50 +61,59 @@ def main():
         
         # Mettre à jour la liste des fichiers existants
         fichiers_existant = fichiers_actuels
+
+        #Repertorie des erreurs
+        #repertoire_erreurs = updatePath(data.repertoire_erreurs)
         
         # Si des nouveaux fichiers sont trouvés, les imprimer et envoyer vers l'API
         if nouveaux_fichiers != []:
             #print(nouveaux_fichiers)
             # requests.post('https://eoljah6zhpt6t2h.m.pipedream.net', json=nouveaux_fichiers)
             print(nouveaux_fichiers)
-            # Si des nouveaux fichiers sont trouvés
-            if test_internet_connection():
-                print("Le PC est connecté à Internet.")
-                for fichier in nouveaux_fichiers:
-                    print("Nouveau fichier créé:", fichier)
+            
+            
+            for fichier in nouveaux_fichiers:
+                print("Nouveau fichier créé:", fichier)
+                nouveaux_fichiers.remove(fichier)
+                data.os.chmod(fichier, 0o777)
+                # Construire le chemin complet du fichier
+                chemin_complet = data.os.path.join(repertoire_a_surveiller, fichier)
+                with open(chemin_complet, 'rb') as file:
+                    created_file = {'image': file}
 
-                    # Construire le chemin complet du fichier
-                    chemin_complet = data.os.path.join(repertoire_a_surveiller, fichier)
-        
-                    
-                    with open(chemin_complet, 'rb') as file:
-                        created_file = {'image': file}
-                    # Envoi du fichier a l'API
-                        
+
+                    #Test de connexion internet                    
+                    if test_internet_connection():
+
+                        # Envoi du fichier a l'API
                         try: 
-
                             #response = data.requests.post(data.endpoint, data={'file': fichier})
-                            response = data.requests.post(data.endpoint, files=created_file)
-
+                            response = data.requests.post(data.endpoint, files=created_file, data={'slug':data.idClient})
+                            #print(response)
                             # Si la réponse est 200 OK
                             if response.status_code == 200:
                                 # Écrire l'élément envoyé dans un fichier texte
-                                with open('elements_envoyes.txt', 'a') as f:
-                                    f.write(fichier + '\n')
+                                send(fichier)
                             else:
                                 # Écrire l'élément non envoyé dans un autre fichier texte
-                                with open('elements_non_envoyes.txt', 'a') as f:
-                                    f.write(fichier + '\n')
+                                error(fichier)
+                                break
                                 
                         except:
-                                with open('elements_non_envoyes.txt', 'a') as f:
-                                    f.write(fichier + '\n')
+                            error(fichier, chemin_complet)
+                            break
 
+                    else:
+                        print("Le PC n'est pas connecté à Internet.")   
+                        error(fichier, chemin_complet)
+                        break
 
-                        # Retirer le fichier de la liste des nouveaux fichiers
-                        nouveaux_fichiers.remove(fichier)
-            else :
-                print("Le PC n'est pas connecté à Internet.")
+            # Retirer le fichier de la liste des nouveaux fichiers
+           
+           
+           
+            
+            
 
 
 
